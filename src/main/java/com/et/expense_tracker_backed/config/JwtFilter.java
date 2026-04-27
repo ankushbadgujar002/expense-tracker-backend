@@ -22,6 +22,16 @@ public class JwtFilter implements Filter {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
+        String path = httpRequest.getRequestURI();
+
+        // ✅ SKIP PUBLIC + SYSTEM ROUTES (CRITICAL FIX)
+        if (path.startsWith("/api/auth")
+                || path.startsWith("/error")
+                || path.equals("/favicon.ico")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = httpRequest.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
