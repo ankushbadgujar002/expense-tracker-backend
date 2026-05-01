@@ -7,7 +7,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CorsConfig {
-
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -15,10 +14,12 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                        		"http://localhost:5173",
-                        		"http://192.168.1.109:5173"
-                        		)
-                        .allowedMethods("*");
+                            "http://localhost:5173",
+                            "http://192.168.1.109:5173",
+                            "https://your-react-app.vercel.app"
+                        )
+                        .allowedMethods("*")
+                        .allowedHeaders("*");
             }
         };
     }
