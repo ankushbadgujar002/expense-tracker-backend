@@ -16,10 +16,11 @@ public class CorsConfig {
                         .allowedOrigins(
                             "http://localhost:5173",
                             "http://192.168.1.109:5173",
-                            "https://your-react-app.vercel.app"
+                            "https://resonant-genie-79fb56.netlify.app"
                         )
                         .allowedMethods("*")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(false);
             }
         };
     }
