@@ -28,9 +28,6 @@ public class ExpenseController {
 	@Autowired
 	private ExpenseService service;
 	
-	@Autowired
-	private ExpenseRepository repository;
-	
 	@PostMapping("/user/{userId}")
 	public Expense addExpense(@RequestBody Expense expense,
 							  @PathVariable Long userId)

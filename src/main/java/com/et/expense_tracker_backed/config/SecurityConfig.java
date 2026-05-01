@@ -11,41 +11,28 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig {
+	private final JwtFilter jwtFilter;
 
-    private final JwtFilter jwtFilter;
+	public SecurityConfig(JwtFilter jwtFilter) {
+		this.jwtFilter = jwtFilter;
+	}
 
-    public SecurityConfig(JwtFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
-    }
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.csrf(csrf -> csrf.disable()).cors(cors -> {
+		}) // keep if you already configured CORS elsewhere
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
+						.requestMatchers("/error").permitAll().anyRequest().authenticated())
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+				.formLogin(form -> form.disable()).httpBasic(basic -> basic.disable());
 
-        http
-            .csrf(csrf -> csrf.disable())
+		http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+		return http.build();
+	}
 
-            .cors(cors -> {})  // keep if you already configured CORS elsewhere
-
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/error").permitAll()
-                .anyRequest().authenticated()
-            )
-
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-
-            .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable());
-
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

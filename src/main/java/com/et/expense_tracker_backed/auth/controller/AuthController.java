@@ -19,87 +19,65 @@ import com.et.expense_tracker_backed.repository.UserRepository;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-	
-	
+
 	private final UserRepository repository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
-	
-	
-	public AuthController(UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            JwtService jwtService) 
-	{
+
+	public AuthController(UserRepository userRepository, 
+						  PasswordEncoder passwordEncoder, 
+						  JwtService jwtService) {
 		this.repository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
 	}
 
-
 	@PostMapping("/register")
-	public ResponseEntity<?> register(@RequestBody RegisterRequest request)
-	{
-		 if (repository.existsByEmail(request.getEmail())) {
-	            return ResponseEntity
-	                    .badRequest()
-	                    .body(Map.of("message", "Email already exists"));
-	    }
-		
+	public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+		if (repository.existsByEmail(request.getEmail())) {
+			return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
+		}
+
 		User user = new User();
 		user.setName(request.getUsername());
 		user.setEmail(request.getEmail());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
-		
+
 		repository.save(user);
-		
-		return ResponseEntity
-				.status(201)
-				.body(Map.of("message", "User Registered Sucessfully"));
+
+		return ResponseEntity.status(201).body(Map.of("message", "User Registered Sucessfully"));
 	}
-	
+
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-	    Optional<User> optionalUser = repository.findByEmail(request.getEmail());
-	    
-	    if(request.getEmail() == null || request.getPassword() == null){
-	        return ResponseEntity
-	                .badRequest()
-	                .body(Map.of("message","Email and password required"));
-	    }
+		Optional<User> optionalUser = repository.findByEmail(request.getEmail());
 
-	    if (optionalUser.isEmpty()) {
-	        return ResponseEntity
-	                .status(401)
-	                .body(Map.of("message", "Invalid email or password"));
-	    }
+		if (request.getEmail() == null || request.getPassword() == null) {
+			return ResponseEntity.badRequest().body(Map.of("message", "Email and password required"));
+		}
 
-	    User user = optionalUser.get();
+		if (optionalUser.isEmpty()) {
+			return ResponseEntity.status(401).body(Map.of("message", "Invalid email or password"));
+		}
 
-	    if (user.getPassword() == null) {
-	        return ResponseEntity
-	                .status(500)
-	                .body(Map.of("message", "Password not stored correctly"));
-	    }
+		User user = optionalUser.get();
 
-	    boolean isMatch = passwordEncoder
-	            .matches(request.getPassword(), user.getPassword());
+		if (user.getPassword() == null) {
+			return ResponseEntity.status(500).body(Map.of("message", "Password not stored correctly"));
+		}
 
-	    if (!isMatch) {
-	        return ResponseEntity
-	                .status(401)
-	                .body(Map.of("message", "Invalid email or password"));
-	    }  
-	    
-	    String token = jwtService.generateToken(user.getEmail());
+		boolean isMatch = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-	    return ResponseEntity.ok(
-	            Map.of(
-	                    "message", "Login Successful",
-	                    "token", token,
-	                    "userId", user.getId(),
-	                    "username", user.getName()
-	            )
-	    );
+		if (!isMatch) {
+			return ResponseEntity.status(401).body(Map.of("message", "Invalid email or password"));
+		}
+
+		String token = jwtService.generateToken(user.getEmail());
+
+		return ResponseEntity.ok(Map.of("message", "Login Successful",
+										"token", token,
+										"userId", user.getId(),
+										"username", user.getName()));
 	}
 }
