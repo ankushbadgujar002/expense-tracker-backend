@@ -15,10 +15,14 @@ import com.et.expense_tracker_backed.config.JwtService;
 import com.et.expense_tracker_backed.entity.User;
 import com.et.expense_tracker_backed.repository.UserRepository;
 
-@CrossOrigin(origins = "http://localhost:5173")
-@RestController
-@RequestMapping("/api/auth")
-public class AuthController {
+@CrossOrigin(origins = {
+	    "http://localhost:5173",
+	    "http://192.168.1.109:5173",
+	    "https://resonant-genie-79fb56.netlify.app"
+	})
+	@RestController
+	@RequestMapping("/api/auth")
+	public class AuthController {
 
 	private final UserRepository repository;
 	private final PasswordEncoder passwordEncoder;
